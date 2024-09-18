@@ -1,0 +1,40 @@
+from extensions import db
+import json
+from sqlalchemy import desc
+from ..models.chat_model import Chat, Message
+
+
+class DataService:
+    @staticmethod
+    # service to get chat by id
+    def get_chat_by_id(chat_id):
+        return Chat.query.get(chat_id)
+
+    @staticmethod
+    # service to get all chats from the database
+    def get_all_chats():
+        return Chat.query.all()
+
+    @staticmethod
+    # service to create a new chat
+    def create_chat():
+        new_chat = Chat()
+        db.session.add(new_chat)
+        db.session.commit()
+        print(f"New Chat created with ID: {new_chat.id}")
+        return str(new_chat.id)
+    
+    @staticmethod
+    def save_message(chat_id, role, content, tool_use_id=None, tool_use_input=None, tool_name=None, tool_result=None):
+        message = Message(
+            chat_id=chat_id,
+            role=role,
+            content=content,
+            tool_name=tool_name,
+            tool_use_id=tool_use_id,
+            tool_input=tool_use_input,
+            tool_result=tool_result
+        )
+        db.session.add(message)
+        db.session.commit()
+        return message
