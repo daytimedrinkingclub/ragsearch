@@ -1,0 +1,16 @@
+[
+    {
+      "name": "search_articles",
+      "description": "Searches the database for the most relevant support articles, this will search and return the top 3 relevant articles which will help in responding to the user query",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query_to_search": {
+            "type": "string",
+            "description": "The query that needs to be searched for the article database needs to be passed here."
+          }
+        },
+        "required": ["query_to_search"]
+      }
+    }
+  ]
