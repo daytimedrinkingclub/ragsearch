@@ -8,6 +8,7 @@ import uuid
 class Chat(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     messages = relationship('Message', back_populates='chat', lazy='dynamic', cascade='all, delete-orphan')
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 # This table stores all types of messages (user, assistant, tool use, tool result)
