@@ -73,3 +73,8 @@ class DataService:
         except Exception as e:
             db.session.rollback()
             raise e
+        
+    @staticmethod
+    def get_all_articles_list():
+        articles = Article.query.with_entities(Article.id, Article.article_name).all()
+        return [{"id": article.id, "article_name": article.article_name} for article in articles]
