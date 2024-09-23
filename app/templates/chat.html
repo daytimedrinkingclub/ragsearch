@@ -57,7 +57,7 @@
             const chatElement = document.createElement('div');
             chatElement.className = 'mb-4 p-4 border rounded cursor-pointer hover:bg-gray-100';
             chatElement.innerHTML = `<strong>Chat ID:</strong> ${chat.id}`;
-            chatElement.onclick = () => loadChat(chat.id);
+            chatElement.onclick = () => window.location.href = `/chat/${chat.id}`;
             chatContent.appendChild(chatElement);
         });
     }
@@ -66,51 +66,7 @@
         const response = await fetch('/chat/create_chat', { method: 'POST' });
         const data = await response.json();
         const chatId = data.chat_id;
-        loadChat(chatId);
-    }
-
-    async function loadChat(chatId) {
-        const response = await fetch(`/chat/get_chat_history?chat_id=${chatId}`);
-        const messages = await response.json();
-        const chatContent = document.getElementById('chatContent');
-        chatContent.innerHTML = '';
-        messages.forEach(message => {
-            const messageElement = document.createElement('div');
-            messageElement.className = message.role === 'user' ? 'mb-4 text-right' : 'mb-4 text-left';
-            messageElement.innerHTML = `<strong>${message.role}:</strong> ${message.content}`;
-            chatContent.appendChild(messageElement);
-        });
-        const inputElement = document.createElement('input');
-        inputElement.type = 'text';
-        inputElement.id = 'chatInput';
-        inputElement.className = 'w-full p-2 border border-gray-300 rounded mt-1';
-        chatContent.appendChild(inputElement);
-        const sendButton = document.createElement('button');
-        sendButton.className = 'bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2';
-        sendButton.innerText = 'Send';
-        sendButton.onclick = () => sendMessage(chatId);
-        chatContent.appendChild(sendButton);
-    }
-
-    async function sendMessage(chatId) {
-        const inputElement = document.getElementById('chatInput');
-        const message = inputElement.value;
-        const response = await fetch('/chat/send_message', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, message: message })
-        });
-        const data = await response.json();
-        const chatContent = document.getElementById('chatContent');
-        const userMessageElement = document.createElement('div');
-        userMessageElement.className = 'mb-4 text-right';
-        userMessageElement.innerHTML = `<strong>user:</strong> ${message}`;
-        chatContent.appendChild(userMessageElement);
-        const assistantMessageElement = document.createElement('div');
-        assistantMessageElement.className = 'mb-4 text-left';
-        assistantMessageElement.innerHTML = `<strong>assistant:</strong> ${data.content}`;
-        chatContent.appendChild(assistantMessageElement);
-        inputElement.value = '';
+        window.location.href = `/chat/${chatId}`;
     }
 
     document.addEventListener('DOMContentLoaded', (event) => {

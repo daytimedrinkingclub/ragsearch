@@ -75,3 +75,7 @@ def get_chat_history():
 def index():
     return render_template('chat.html', active_tab='Chat')
 
+@chat_bp.route('/<chat_id>')
+def chat_page(chat_id):
+    return render_template('chat_page.html', chat_id=chat_id, active_tab='Chat')
+
