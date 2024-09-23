@@ -1,4 +1,4 @@
-# app/models/models.py
+# app/models/chat_model.py
 from datetime import datetime
 from extensions import db
 from sqlalchemy.orm import relationship
@@ -13,7 +13,7 @@ class Chat(db.Model):
 # This table stores all types of messages (user, assistant, tool use, tool result)
 class Message(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    chat_id = db.Column(UUID(as_uuid=True), db.ForeignKey('chat.id'), nullable=False)
+    chat_id = db.Column(UUID(as_uuid=True), db.ForeignKey('chat.id', ondelete='CASCADE'), nullable=False)
     role = db.Column(db.Enum('user', 'assistant', name='role_enum'), nullable=False)
     content = db.Column(db.Text, nullable=False)
     tool_name = db.Column(db.Text, nullable=True)

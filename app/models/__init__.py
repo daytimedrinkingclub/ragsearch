@@ -1,2 +1,2 @@
-from .embeddings_model import Article
+from .article_model import Article
 from .chat_model import Chat

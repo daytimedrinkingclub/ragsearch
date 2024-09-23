@@ -6,7 +6,8 @@ ragbot/
         - __init__.py
         - routes/
             - __init__.py
-            - main.py # all the routes for the app
+            - article_routes.py # all the routes for the app
+            - chat_routes.py # all the routes for the app
         - models/
             - __init__.py
             - embeddings_model.py # the model which will store the embeddings response and articles in the database

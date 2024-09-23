@@ -2,6 +2,8 @@ from extensions import db
 import json
 from sqlalchemy import desc
 from ..models.chat_model import Chat, Message
+from ..models.article_model import Article
+import uuid
 
 
 class DataService:
@@ -38,3 +40,54 @@ class DataService:
         db.session.add(message)
         db.session.commit()
         return message
+    
+    @staticmethod
+    def create_article(article_name, article_content):
+        try:
+            # Generate a unique ID
+            unique_id = str(uuid.uuid4())
+
+            # Store in database
+            new_article = Article(id=unique_id, article_name=article_name, article_content=article_content)
+            db.session.add(new_article)
+            db.session.commit()
+
+            return {"id": unique_id}
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    @staticmethod
+    def get_article_by_id(article_id):
+        return Article.query.get(article_id)
+
+    @staticmethod
+    def delete_article(article_id):
+        try:
+            article = Article.query.get(article_id)
+            if article:
+                db.session.delete(article)
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            db.session.rollback()
+            raise e
+        
+    @staticmethod
+    def get_all_articles_list():
+        articles = Article.query.with_entities(Article.id, Article.article_name).all()
+        return [{"id": article.id, "article_name": article.article_name} for article in articles]
+
+    @staticmethod
+    def update_article(article_id, new_article_content):
+        try:
+            article = Article.query.get(article_id)
+            if article:
+                article.article_content = new_article_content
+                db.session.commit()
+                return {"id": article.id, "article_name": article.article_name}
+            return None
+        except Exception as e:
+            db.session.rollback()
+            raise e
