@@ -81,7 +81,7 @@ def update_article():
 @article_bp.route('/')
 def index():
     articles = DataService.get_all_articles_list()
-    return render_template('index.html', articles=articles)
+    return render_template('index.html', articles=articles, active_tab='Articles')
 
 @article_bp.route('/add_article', methods=['GET'])
 def add_article():

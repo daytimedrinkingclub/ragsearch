@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from app.services.data_service import DataService
 from app.services.anthropic_chat import AnthropicChat
 
@@ -46,7 +46,7 @@ def send_message():
         return jsonify(response_dict), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 @chat_bp.route('/get_chats', methods=['GET'])
 def get_chats():
     chats = DataService.get_all_chats()
@@ -68,4 +68,8 @@ def get_chat_history():
         return jsonify(messages_list), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@chat_bp.route('/')
+def index():
+    return render_template('chat.html', active_tab='Chat')
 
