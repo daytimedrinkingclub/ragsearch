@@ -16,7 +16,8 @@ class AnthropicChat:
     def process_tool_call(tool_name, tool_input, tool_use_id, chat_id):
         if tool_name == "search_articles":
             print(f"Searching articles for: {tool_input['query_to_search']}")
-            return search_articles(tool_input["query_to_search"], tool_use_id, chat_id)
+            results = search_articles(tool_input["query_to_search"])
+            return results
         else:
             raise ValueError(f"Unsupported tool: {tool_name}")
     
@@ -52,16 +53,15 @@ class AnthropicChat:
 
         # Handle tool use
         tool_use = next(block for block in response.content if block.type == "tool_use")
-
         
         content = response.content[0].text if response.content and response.content[0].type == "text" else None
+
         DataService.save_message(chat_id, "assistant", content=content, tool_use_id=tool_use.id, tool_use_input=tool_use.input, tool_name=tool_use.name)
-
         tool_result = AnthropicChat.process_tool_call(tool_use.name, tool_use.input, tool_use.id, chat_id)
-
 
         if tool_result:
             # If a tool result is received, build the latest context and call process_conversation again
+            DataService.save_message(chat_id, "user", content=json.dumps(tool_result), tool_use_id=tool_use.id, tool_use_input=tool_use.input, tool_name=tool_use.name, tool_result=json.dumps(tool_result))
             conversation = ContextService.build_context(chat_id)
             return AnthropicChat.process_conversation(chat_id)
 

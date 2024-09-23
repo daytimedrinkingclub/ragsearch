@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from app.services.data_service import DataService
 from app.services.embeddings_service import EmbeddingsService
+from app.services.embeddings_search import search_articles
 
 article_bp = Blueprint('article', __name__)
 
@@ -93,3 +94,15 @@ def edit_article(article_id):
     if article is None:
         return jsonify({"error": "Article not found"}), 404
     return render_template('edit_article.html', article=article)
+
+@article_bp.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('q', '')
+    if not query:
+        return jsonify({"error": "No search query provided"}), 400
+    
+    try:
+        results = search_articles(query)
+        return results
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
