@@ -5,7 +5,7 @@ from .embeddings_search import search_articles
 from .data_service import DataService
 from .context_service import ContextService
 from typing import List, Dict, Any
-
+from datetime import datetime
 client = anthropic.Client()
 
 MODEL_NAME = "claude-3-opus-20240229"
@@ -22,7 +22,7 @@ class AnthropicChat:
     
     @staticmethod
     def load_tools():
-        tools_path = os.path.join(os.path.dirname(__file__), '..', 'tools', 'tools.json')
+        tools_path = os.path.join(os.path.dirname(__file__), 'tools', 'tools.json')
         with open(tools_path, 'r') as f:
             return json.load(f)
         
@@ -33,15 +33,14 @@ class AnthropicChat:
         
         response = client.messages.create(
             model="claude-3-5-sonnet-20240620",
-            max_tokens=4000,
+            max_tokens=1000,
             temperature=0,
             system=
             """
             Today is {today}.\n
-            You are tasked to help the user with their research tasks for ai tools. Always let the user know the list of tools available
+            You are the support assistant for Delta Exchange, help the user with their queries.
             """,
             tools=tools,
-            # tool_choice={"type": "auto"},
             messages=conversation,
         )
         print(f"Response Received from ANTHROPIC API: {response}")

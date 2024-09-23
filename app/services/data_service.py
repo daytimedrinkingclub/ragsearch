@@ -3,29 +3,10 @@ import json
 from sqlalchemy import desc
 from ..models.chat_model import Chat, Message
 from ..models.article_model import Article
-from ..models.user_model import User
 import uuid
 
 
 class DataService:
-
-    @staticmethod
-    def create_user(username=None, email=None):
-        try:
-            new_user = User(username=username, email=email)
-            db.session.add(new_user)
-            db.session.commit()
-            return {
-                "id": new_user.id,
-                "username": new_user.username,
-                "email": new_user.email,
-                "created_at": new_user.created_at,
-                "updated_at": new_user.updated_at
-            }
-        except Exception as e:
-            db.session.rollback()
-            raise e
-
     @staticmethod
     # service to get chat by id
     def get_chat_by_id(chat_id):

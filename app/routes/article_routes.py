@@ -66,7 +66,7 @@ def delete_article():
     try:
         EmbeddingsService.delete_article_embedding(article_id)
         DataService.delete_article(article_id)
-        return jsonify({"message": "Article deleted successfully"}), 200
+        return jsonify({"message": "Article and embeddings deleted successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

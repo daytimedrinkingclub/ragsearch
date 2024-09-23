@@ -8,15 +8,12 @@ import uuid
 class Chat(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     messages = relationship('Message', back_populates='chat', lazy='dynamic', cascade='all, delete-orphan')
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
-    user = relationship('User', back_populates='chats')
 
 # This table stores all types of messages (user, assistant, tool use, tool result)
 class Message(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    chat_id = db.Column(UUID(as_uuid=True), db.ForeignKey('chat.id'), nullable=False)
+    chat_id = db.Column(UUID(as_uuid=True), db.ForeignKey('chat.id', ondelete='CASCADE'), nullable=False)
     role = db.Column(db.Enum('user', 'assistant', name='role_enum'), nullable=False)
     content = db.Column(db.Text, nullable=False)
     tool_name = db.Column(db.Text, nullable=True)
