@@ -9,6 +9,9 @@ services:
       - DATABASE_URL=${DATABASE_URL}
     depends_on:
       - db
+    command: >
+      sh -c "flask db upgrade &&
+             gunicorn -b 0.0.0.0:5000 run:app"
 
   db:
     image: postgres:13
