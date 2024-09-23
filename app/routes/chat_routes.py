@@ -113,7 +113,8 @@ def message_to_dict(message):
     
     return {
         "content": content,
-        "role": message.role
+        "role": message.role,
+        "tool_name": message.tool_name
     }
 
 def block_to_dict(block):

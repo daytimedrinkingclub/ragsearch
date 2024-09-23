@@ -28,4 +28,4 @@ ENV FLASK_ENV=production
 EXPOSE 5000
 
 # Run the application
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "-w", "4", "run:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "run:app"]
