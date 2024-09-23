@@ -3,19 +3,21 @@
 {% block title %}Chat{% endblock %}
 
 {% block content %}
-<div class="flex justify-between items-center mb-4">
-    <h2 class="text-2xl font-bold">Chat</h2>
-    <button onclick="window.history.back()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back</button>
-</div>
-<div id="chatContainer" class="bg-white p-6 rounded-lg shadow-md relative min-h-500">
-    <div id="loader" class="loader" style="display: none;"></div>
-    <div id="chatContent" class="overflow-y-auto" style="max-height: calc(100vh - 200px); padding-bottom: 60px;">
-        <!-- Chat UI will be dynamically generated here -->
+<div class="flex flex-col h-screen">
+    <div class="flex justify-between items-center mb-4 p-4 bg-white shadow-md">
+        <h2 class="text-2xl font-bold">Chat</h2>
+        <button onclick="window.history.back()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back</button>
     </div>
-    <div id="inputContainer" class="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md">
-        <div class="flex container mx-auto">
-            <input type="text" id="chatInput" class="flex-grow p-2 border border-gray-300 rounded-l" placeholder="Type your message...">
-            <button id="sendButton" class="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600">Send</button>
+    <div id="chatContainer" class="flex-grow bg-white p-6 rounded-lg shadow-md relative overflow-hidden">
+        <div id="loader" class="loader" style="display: none;"></div>
+        <div id="chatContent" class="overflow-y-auto h-full" style="padding-bottom: 60px;">
+            <!-- Chat UI will be dynamically generated here -->
+        </div>
+        <div id="inputContainer" class="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-md">
+            <div class="flex container mx-auto">
+                <input type="text" id="chatInput" class="flex-grow p-2 border border-gray-300 rounded-l" placeholder="Type your message...">
+                <button id="sendButton" class="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600">Send</button>
+            </div>
         </div>
     </div>
 </div>
