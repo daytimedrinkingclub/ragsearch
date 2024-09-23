@@ -50,12 +50,15 @@
         border-radius: 10px;
         margin-bottom: 10px;
         max-width: 60%;
+        display: flex;
+        align-items: baseline;
     }
 
     .message-card.user {
         background-color: #e0f7fa;
         text-align: right;
         margin-left: auto;
+        width: fit-content;
     }
 
     .message-card.assistant {
@@ -74,6 +77,16 @@
         margin-left: auto;
         margin-right: auto;
     }
+
+    .thinking {
+        animation: blink 1.5s step-start 0s infinite;
+    }
+
+    @keyframes blink {
+        50% {
+            opacity: 0.5;
+        }
+    }
 </style>
 
 <script>
@@ -91,7 +104,7 @@
         filteredMessages.forEach(message => {
             const messageElement = document.createElement('div');
             messageElement.className = `message-card ${message.role}`;
-            messageElement.innerHTML = `<strong>${message.role}:</strong> ${message.content}`;
+            messageElement.innerHTML = `<i class="fas fa-${message.role === 'user' ? 'user' : 'robot'} mr-2"></i> ${message.content}`;
             chatContent.appendChild(messageElement);
         });
     }
@@ -108,11 +121,17 @@
         inputElement.disabled = true;
         sendButton.disabled = true;
 
-        // Add loading card
-        const loadingCard = document.createElement('div');
-        loadingCard.className = 'loading-card';
-        loadingCard.innerText = 'Sending...';
-        chatContent.appendChild(loadingCard);
+        // Add user message
+        const userMessageElement = document.createElement('div');
+        userMessageElement.className = 'message-card user';
+        userMessageElement.innerHTML = `<i class="fas fa-user mr-2"></i> ${message}`;
+        chatContent.appendChild(userMessageElement);
+
+        // Add thinking card
+        const thinkingCard = document.createElement('div');
+        thinkingCard.className = 'message-card assistant thinking';
+        thinkingCard.innerText = 'Thinking...';
+        chatContent.appendChild(thinkingCard);
 
         const response = await fetch('/chat/send_message', {
             method: 'POST',
@@ -121,19 +140,13 @@
         });
         const data = await response.json();
 
-        // Remove loading card
-        chatContent.removeChild(loadingCard);
-
-        // Add user message
-        const userMessageElement = document.createElement('div');
-        userMessageElement.className = 'message-card user';
-        userMessageElement.innerHTML = `<strong>user:</strong> ${message}`;
-        chatContent.appendChild(userMessageElement);
+        // Remove thinking card
+        chatContent.removeChild(thinkingCard);
 
         // Add assistant message
         const assistantMessageElement = document.createElement('div');
         assistantMessageElement.className = 'message-card assistant';
-        assistantMessageElement.innerHTML = `<strong>assistant:</strong> ${data.content}`;
+        assistantMessageElement.innerHTML = `<i class="fas fa-robot mr-2"></i> ${data.content}`;
         chatContent.appendChild(assistantMessageElement);
 
         // Enable input and button
