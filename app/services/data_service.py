@@ -28,6 +28,10 @@ class DataService:
     
     @staticmethod
     def save_message(chat_id, role, content, tool_use_id=None, tool_use_input=None, tool_name=None, tool_result=None):
+        # Serialize content to JSON string if it's a list or dict
+        if isinstance(content, (list, dict)):
+            content = json.dumps(content)
+        
         message = Message(
             chat_id=chat_id,
             role=role,

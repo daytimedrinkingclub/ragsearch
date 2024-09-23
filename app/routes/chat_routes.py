@@ -1,29 +1,22 @@
 from flask import Blueprint, request, jsonify, render_template
 from app.services.data_service import DataService
 from app.services.anthropic_chat import AnthropicChat
+import json
 
 chat_bp = Blueprint('chat', __name__)
 
 def message_to_dict(message):
     """Convert a Message object to a dictionary."""
-    content = ""
-    if isinstance(message.content, list):
-        for block in message.content:
-            if hasattr(block, 'text'):
-                content += block.text
-    else:
-        content = str(message.content)
+    content = message.content if isinstance(message.content, str) else json.loads(message.content)
     
     return {
         "content": content,
         "role": message.role,
-        "model": message.model,
-        "stop_reason": message.stop_reason,
-        "type": message.type,
-        "usage": {
-            "input_tokens": message.usage.input_tokens,
-            "output_tokens": message.usage.output_tokens
-        }
+        "tool_name": message.tool_name,
+        "tool_use_id": message.tool_use_id,
+        "tool_input": message.tool_input,
+        "tool_result": message.tool_result,
+        "created_at": message.created_at.isoformat()
     }
 
 @chat_bp.route('/create_chat', methods=['POST'])
@@ -50,7 +43,16 @@ def send_message():
 @chat_bp.route('/get_chats', methods=['GET'])
 def get_chats():
     chats = DataService.get_all_chats()
-    return jsonify(chats), 200
+    serialized_chats = [chat_to_dict(chat) for chat in chats]
+    return jsonify(serialized_chats), 200
+
+def chat_to_dict(chat):
+    """Convert a Chat object to a dictionary."""
+    return {
+        "id": str(chat.id),
+        "created_at": chat.created_at.isoformat(),
+        "messages": [message_to_dict(message) for message in chat.messages]
+    }
 
 @chat_bp.route('/get_chat_history', methods=['GET'])
 def get_chat_history():
