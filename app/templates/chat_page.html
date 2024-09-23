@@ -8,8 +8,14 @@
 </div>
 <div id="chatContainer" class="bg-white p-6 rounded-lg shadow-md relative min-h-500">
     <div id="loader" class="loader" style="display: none;"></div>
-    <div id="chatContent">
+    <div id="chatContent" class="overflow-y-auto" style="max-height: calc(100vh - 200px);">
         <!-- Chat UI will be dynamically generated here -->
+    </div>
+    <div id="inputContainer" class="sticky bottom-0 bg-white p-4">
+        <div class="flex">
+            <input type="text" id="chatInput" class="flex-grow p-2 border border-gray-300 rounded-l" placeholder="Type your message...">
+            <button id="sendButton" class="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600">Send</button>
+        </div>
     </div>
 </div>
 
@@ -35,6 +41,36 @@
     .min-h-500 {
         min-height: 500px;
     }
+
+    .message-card {
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        max-width: 60%;
+    }
+
+    .message-card.user {
+        background-color: #e0f7fa;
+        text-align: right;
+        margin-left: auto;
+    }
+
+    .message-card.assistant {
+        background-color: #f1f8e9;
+        text-align: left;
+        margin-right: auto;
+    }
+
+    .loading-card {
+        padding: 10px;
+        border-radius: 10px;
+        background-color: #f3f3f3;
+        text-align: center;
+        margin-bottom: 10px;
+        max-width: 60%;
+        margin-left: auto;
+        margin-right: auto;
+    }
 </style>
 
 <script>
@@ -51,46 +87,64 @@
         
         messages.forEach(message => {
             const messageElement = document.createElement('div');
-            messageElement.className = message.role === 'user' ? 'mb-4 text-right' : 'mb-4 text-left';
+            messageElement.className = `message-card ${message.role}`;
             messageElement.innerHTML = `<strong>${message.role}:</strong> ${message.content}`;
             chatContent.appendChild(messageElement);
         });
-        const inputElement = document.createElement('input');
-        inputElement.type = 'text';
-        inputElement.id = 'chatInput';
-        inputElement.className = 'w-full p-2 border border-gray-300 rounded mt-1';
-        chatContent.appendChild(inputElement);
-        const sendButton = document.createElement('button');
-        sendButton.className = 'bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2';
-        sendButton.innerText = 'Send';
-        sendButton.onclick = () => sendMessage(chatId);
-        chatContent.appendChild(sendButton);
     }
 
     async function sendMessage(chatId) {
         const inputElement = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        const chatContent = document.getElementById('chatContent');
         const message = inputElement.value;
+
+        if (!message.trim()) return;
+
+        // Disable input and button
+        inputElement.disabled = true;
+        sendButton.disabled = true;
+
+        // Add loading card
+        const loadingCard = document.createElement('div');
+        loadingCard.className = 'loading-card';
+        loadingCard.innerText = 'Sending...';
+        chatContent.appendChild(loadingCard);
+
         const response = await fetch('/chat/send_message', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: chatId, message: message })
         });
         const data = await response.json();
-        const chatContent = document.getElementById('chatContent');
+
+        // Remove loading card
+        chatContent.removeChild(loadingCard);
+
+        // Add user message
         const userMessageElement = document.createElement('div');
-        userMessageElement.className = 'mb-4 text-right';
+        userMessageElement.className = 'message-card user';
         userMessageElement.innerHTML = `<strong>user:</strong> ${message}`;
         chatContent.appendChild(userMessageElement);
+
+        // Add assistant message
         const assistantMessageElement = document.createElement('div');
-        assistantMessageElement.className = 'mb-4 text-left';
+        assistantMessageElement.className = 'message-card assistant';
         assistantMessageElement.innerHTML = `<strong>assistant:</strong> ${data.content}`;
         chatContent.appendChild(assistantMessageElement);
+
+        // Enable input and button
+        inputElement.disabled = false;
+        sendButton.disabled = false;
         inputElement.value = '';
     }
 
     document.addEventListener('DOMContentLoaded', (event) => {
         const chatId = "{{ chat_id }}";
         loadChat(chatId);
+
+        const sendButton = document.getElementById('sendButton');
+        sendButton.onclick = () => sendMessage(chatId);
     });
 </script>
 {% endblock %}

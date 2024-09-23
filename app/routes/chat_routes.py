@@ -5,19 +5,47 @@ import json
 
 chat_bp = Blueprint('chat', __name__)
 
+@chat_bp.route('/')
+def index():
+    return render_template('chat.html', active_tab='Chat')
+
+@chat_bp.route('/<chat_id>')
+def chat_page(chat_id):
+    return render_template('chat_page.html', chat_id=chat_id, active_tab='Chat')
+
+@chat_bp.route('/get_chats', methods=['GET'])
+def get_chats():
+    chats = DataService.get_all_chats()
+    serialized_chats = [chat_to_dict(chat) for chat in chats]
+    return jsonify(serialized_chats), 200
+
+def chat_to_dict(chat):
+    """Convert a Chat object to a dictionary."""
+    return {
+        "id": str(chat.id),
+        "created_at": chat.created_at.isoformat(),
+        "messages": [message_to_dict(message) for message in chat.messages]
+    }
+
 def message_to_dict(message):
     """Convert a Message object to a dictionary."""
-    content = message.content if isinstance(message.content, str) else json.loads(message.content)
+    content = message.content
+    if isinstance(content, list):
+        content = [block_to_dict(block) for block in content]
+    elif not isinstance(content, str):
+        content = str(content)
     
     return {
         "content": content,
         "role": message.role,
-        "tool_name": message.tool_name,
-        "tool_use_id": message.tool_use_id,
-        "tool_input": message.tool_input,
-        "tool_result": message.tool_result,
         "created_at": message.created_at.isoformat()
     }
+
+def block_to_dict(block):
+    """Convert a TextBlock object to a dictionary."""
+    if hasattr(block, 'text'):
+        return {"text": block.text}
+    return str(block)
 
 @chat_bp.route('/create_chat', methods=['POST'])
 def create_chat():
@@ -40,20 +68,6 @@ def send_message():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@chat_bp.route('/get_chats', methods=['GET'])
-def get_chats():
-    chats = DataService.get_all_chats()
-    serialized_chats = [chat_to_dict(chat) for chat in chats]
-    return jsonify(serialized_chats), 200
-
-def chat_to_dict(chat):
-    """Convert a Chat object to a dictionary."""
-    return {
-        "id": str(chat.id),
-        "created_at": chat.created_at.isoformat(),
-        "messages": [message_to_dict(message) for message in chat.messages]
-    }
-
 @chat_bp.route('/get_chat_history', methods=['GET'])
 def get_chat_history():
     chat_id = request.args.get('chat_id')
@@ -70,12 +84,3 @@ def get_chat_history():
         return jsonify(messages_list), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-@chat_bp.route('/')
-def index():
-    return render_template('chat.html', active_tab='Chat')
-
-@chat_bp.route('/<chat_id>')
-def chat_page(chat_id):
-    return render_template('chat_page.html', chat_id=chat_id, active_tab='Chat')
-
