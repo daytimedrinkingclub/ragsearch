@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add New Article</title>
+</head>
+<body>
+    <h1>Add New Article</h1>
+    <form action="{{ url_for('article.upload_article') }}" method="post">
+        <label for="article_name">Article Name:</label>
+        <input type="text" id="article_name" name="article_name" required>
+        <br>
+        <label for="article_content">Article Content:</label>
+        <textarea id="article_content" name="article_content" required></textarea>
+        <br>
+        <button type="submit">Add Article</button>
+    </form>
+</body>
+</html>

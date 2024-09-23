@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect, url_for
 from config import Config
 from flask_cors import CORS
 from extensions import db, migrate
@@ -18,5 +18,9 @@ def create_app(config_class=Config):
 
     app.register_blueprint(chat_bp, url_prefix='/chat')
     app.register_blueprint(article_bp, url_prefix='/article')
+
+    @app.route('/')
+    def home():
+        return redirect(url_for('article.index'))
 
     return app

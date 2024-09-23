@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Articles List</title>
+</head>
+<body>
+    <h1>Articles List</h1>
+    <a href="{{ url_for('article.add_article') }}">Add New Article</a>
+    <ul>
+        {% for article in articles %}
+        <li>
+            <h2>{{ article.article_name }}</h2>
+            <p>{{ article.article_content }}</p>
+            <a href="{{ url_for('article.edit_article', article_id=article.id) }}">Edit</a>
+            <form action="{{ url_for('article.delete_article') }}" method="post" style="display:inline;">
+                <input type="hidden" name="article_id" value="{{ article.id }}">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

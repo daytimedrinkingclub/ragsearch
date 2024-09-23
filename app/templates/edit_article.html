@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Article</title>
+</head>
+<body>
+    <h1>Edit Article</h1>
+    <form action="{{ url_for('article.update_article') }}" method="post">
+        <input type="hidden" name="article_id" value="{{ article.id }}">
+        <label for="article_name">Article Name:</label>
+        <input type="text" id="article_name" name="article_name" value="{{ article.article_name }}" required>
+        <br>
+        <label for="article_content">Article Content:</label>
+        <textarea id="article_content" name="new_article_content" required>{{ article.article_content }}</textarea>
+        <br>
+        <button type="submit">Update Article</button>
+    </form>
+</body>
+</html>
