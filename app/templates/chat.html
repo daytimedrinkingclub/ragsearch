@@ -53,13 +53,29 @@
         loader.style.display = 'none';
         chatContainer.classList.remove('min-h-500');
         
-        chats.forEach(chat => {
-            const chatElement = document.createElement('div');
-            chatElement.className = 'mb-4 p-4 border rounded cursor-pointer hover:bg-gray-100';
-            chatElement.innerHTML = `<strong>Chat ID:</strong> ${chat.id}`;
-            chatElement.onclick = () => window.location.href = `/chat/${chat.id}`;
-            chatContent.appendChild(chatElement);
-        });
+        if (chats.length === 0) {
+            chatContent.innerHTML = `
+                <div class="text-center">
+                    <p class="text-gray-500 mb-4">No chats available. Click the button below to start a new chat.</p>
+                    <button onclick="createChat()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Chat</button>
+                </div>
+            `;
+        } else {
+            chats.forEach(chat => {
+                const chatElement = document.createElement('div');
+                chatElement.className = 'mb-4 p-4 border rounded flex justify-between items-center hover:bg-gray-100';
+                chatElement.innerHTML = `
+                    <div>
+                        <strong>Last Message:</strong> ${chat.last_message}
+                    </div>
+                    <div>
+                        <button onclick="deleteChat(event, '${chat.id}')" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Delete</button>
+                    </div>
+                `;
+                chatElement.onclick = () => window.location.href = `/chat/${chat.id}`;
+                chatContent.appendChild(chatElement);
+            });
+        }
     }
 
     async function createChat() {
@@ -67,6 +83,20 @@
         const data = await response.json();
         const chatId = data.chat_id;
         window.location.href = `/chat/${chatId}`;
+    }
+
+    async function deleteChat(event, chatId) {
+        event.stopPropagation(); // Stop the click event from propagating to the parent elements
+        const response = await fetch(`/chat/delete_chat`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId })
+        });
+        if (response.ok) {
+            loadChats();
+        } else {
+            alert('Failed to delete chat');
+        }
     }
 
     document.addEventListener('DOMContentLoaded', (event) => {

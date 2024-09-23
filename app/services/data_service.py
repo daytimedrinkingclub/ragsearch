@@ -95,3 +95,16 @@ class DataService:
         except Exception as e:
             db.session.rollback()
             raise e
+
+    @staticmethod
+    def delete_chat(chat_id):
+        try:
+            chat = Chat.query.get(chat_id)
+            if chat:
+                db.session.delete(chat)
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            db.session.rollback()
+            raise e

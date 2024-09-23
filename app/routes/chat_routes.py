@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, render_template
 from app.services.data_service import DataService
 from app.services.anthropic_chat import AnthropicChat
 from datetime import datetime
+from app.models.chat_model import Chat, Message
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -77,12 +78,29 @@ def get_chat_history():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@chat_bp.route('/delete_chat', methods=['DELETE'])
+def delete_chat():
+    """Delete a chat."""
+    data = request.json
+    chat_id = data.get('chat_id')
+
+    if not chat_id:
+        return jsonify({"error": "Missing chat_id"}), 400
+
+    try:
+        DataService.delete_chat(chat_id)
+        return jsonify({"message": "Chat deleted"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # Helper Functions
 def chat_to_dict(chat):
     """Convert a Chat object to a dictionary."""
+    last_message = chat.messages.order_by(Message.created_at.desc()).first()
+    last_message_content = last_message.content if last_message else "No messages yet"
     return {
         "id": str(chat.id),
-        "messages": [message_to_dict(message) for message in chat.messages]
+        "last_message": last_message_content
     }
 
 def message_to_dict(message):
