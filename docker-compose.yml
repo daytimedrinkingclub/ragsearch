@@ -4,7 +4,7 @@ services:
   web:
     build: .
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       - DATABASE_URL=${DATABASE_URL}
     depends_on:
