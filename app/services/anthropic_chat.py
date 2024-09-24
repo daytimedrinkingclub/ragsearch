@@ -6,11 +6,42 @@ from .data_service import DataService
 from .context_service import ContextService
 from typing import List, Dict, Any
 from datetime import datetime
+from app.models.system_model import System
+from extensions import db
+
 client = anthropic.Client()
 
 MODEL_NAME = "claude-3-opus-20240229"
 
 class AnthropicChat:
+
+    def __init__(self):
+        self.client = anthropic.Anthropic()
+
+    def get_system_prompt(self):
+        system_prompt = System.query.filter_by(key='system_prompt').first()
+        if system_prompt:
+            today = datetime.now().strftime("%Y-%m-%d")
+            return system_prompt.value.format(today=today)
+        else:
+            # Default prompt if not found in the database
+            return "You are a helpful assistant."
+
+    def chat(self, messages):
+        system_prompt = self.get_system_prompt()
+        
+        formatted_messages = [
+            {"role": "system", "content": system_prompt},
+            *[{"role": msg.role, "content": msg.content} for msg in messages]
+        ]
+
+        response = self.client.messages.create(
+            model="claude-3-opus-20240229",
+            messages=formatted_messages,
+            max_tokens=1000,
+        )
+
+        return response.content[0].text
 
     @staticmethod
     def process_tool_call(tool_name, tool_input, tool_use_id, chat_id):
@@ -32,15 +63,20 @@ class AnthropicChat:
         tools = AnthropicChat.load_tools()
         conversation = ContextService.build_context(chat_id)
         
+        # Fetch the system prompt from the database
+        system_prompt = System.query.filter_by(key='system_prompt').first()
+        if system_prompt:
+            today = datetime.now().strftime("%Y-%m-%d")
+            system_message = system_prompt.value.format(today=today)
+        else:
+            # Default prompt if not found in the database
+            system_message = "You are a helpful assistant."
+        
         response = client.messages.create(
             model="claude-3-5-sonnet-20240620",
             max_tokens=1000,
             temperature=0,
-            system=
-            """
-            Today is {today}.\n
-            You are the support assistant for Delta Exchange, help the user with their queries.
-            """,
+            system=system_message,
             tools=tools,
             messages=conversation,
         )
