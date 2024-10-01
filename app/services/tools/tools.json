@@ -12,5 +12,19 @@
         },
         "required": ["query_to_search"]
       }
+    },
+    {
+      "name": "check_deposit_status",
+      "description": "Checks the deposit status of the user, this will check and return the deposit status of the user",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "transfer_number": {
+            "type": "string",
+            "description": "The transfer number of the deposit that needs to be checked."
+          }
+        },
+        "required": ["transfer_number"]
+      }
     }
   ]

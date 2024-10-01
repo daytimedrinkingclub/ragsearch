@@ -13,3 +13,4 @@ class Config:
     PINECONE_ENV = os.environ.get('PINECONE_ENV')
     PINECONE_INDEX_NAME = os.environ.get('PINECONE_INDEX_NAME')
     PINECONE_HOST = os.environ.get('PINECONE_HOST')
+    DELTAEX_API_KEY = os.environ.get('DELTAEX_API_KEY')

@@ -2,6 +2,7 @@ import os
 import anthropic
 import json
 from .embeddings_search import search_articles
+from .external_tools import check_deposit_status
 from .data_service import DataService
 from .context_service import ContextService
 from typing import List, Dict, Any
@@ -48,6 +49,10 @@ class AnthropicChat:
         if tool_name == "search_articles":
             print(f"Searching articles for: {tool_input['query_to_search']}")
             results = search_articles(tool_input["query_to_search"])
+            return results
+        elif tool_name == "check_deposit_status":
+            print(f"Checking deposit status for: {tool_input['transfer_number']}")
+            results = check_deposit_status(tool_input["transfer_number"])
             return results
         else:
             raise ValueError(f"Unsupported tool: {tool_name}")
