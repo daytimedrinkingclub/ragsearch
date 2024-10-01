@@ -8,6 +8,7 @@ venv/
 *.sqlite3
 *.log
 *.env
+*.env.production
 *.DS_Store
 __pycache__/
 scripts/__pycache__/
