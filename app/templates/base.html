@@ -32,6 +32,9 @@
             websiteToken: 'Sn4u9voc4f7WZwfC9WrLfewz',
             baseUrl: BASE_URL
           })
+          window.$chatwoot.setCustomAttributes({
+            auth_token: localStorage.getItem('auth_token') || 'No auth token',
+          });
         }
       })(document,"script");
     </script>
