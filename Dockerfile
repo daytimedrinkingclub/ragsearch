@@ -8,6 +8,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file into the container
@@ -24,8 +25,8 @@ ENV FLASK_APP=run.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_ENV=production
 
-# Expose the port the app runs on
-EXPOSE 5000
+# Expose the port the app runs on (this is just for documentation, not binding)
+EXPOSE ${FLASK_RUN_PORT}
 
-# Run the application
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "run:app"]
+# Run the gunicorn server
+CMD ["gunicorn", "-b", "0.0.0.0:${FLASK_RUN_PORT}", "run:app"]

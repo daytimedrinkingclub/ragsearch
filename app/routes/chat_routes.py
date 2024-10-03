@@ -31,7 +31,9 @@ def get_chats():
 def create_chat():
     """Create a new chat."""
     try:
-        chat_id = DataService.create_chat()
+        data = request.json
+        external_id = data.get('external_id')
+        chat_id = DataService.create_chat(external_id)
         return jsonify({"chat_id": chat_id}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -109,8 +109,16 @@ class AnthropicChat:
         return response
 
     @staticmethod
-    def handle_chat(chat_id: str, user_message: str) -> str:
-        DataService.save_message(chat_id, "user", content=user_message)
+    def handle_chat(chat_id, message, external_id=None):
+        if external_id:
+            chat = DataService.get_or_create_chat(external_id)
+            chat_id = chat.id
+        else:
+            chat = DataService.get_chat_by_id(chat_id)
+            if not chat:
+                chat_id = DataService.create_chat()
+        
+        DataService.save_message(chat_id, "user", content=message)
         # Process the conversation
         response = AnthropicChat.process_conversation(chat_id)
         # Extract the text content from the response
