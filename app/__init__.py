@@ -4,6 +4,7 @@ from flask_cors import CORS
 from extensions import db, migrate
 from app.routes.system_routes import system_bp
 from app.routes.webhook_routes import webhook_bp
+from app.models.system_model import System
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -26,5 +27,11 @@ def create_app(config_class=Config):
     @app.route('/')
     def home():
         return redirect(url_for('article.index'))
+
+    @app.cli.command("seed-db")
+    def seed_db():
+        """Seed the database."""
+        from app.seed import seed_database
+        seed_database()
 
     return app

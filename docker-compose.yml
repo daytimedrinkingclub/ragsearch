@@ -1,17 +1,28 @@
-version: '3.8'
-
 services:
   web:
     build: .
+    volumes:
+      - .:/app
+      - ./migrations:/app/migrations
     ports:
-      - "5001:5000"
+      - "5000:5000"
     environment:
-      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - FLASK_APP=${FLASK_APP}
+      - FLASK_ENV=${FLASK_ENV}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_ENV=${PINECONE_ENV}
+      - PINECONE_HOST=${PINECONE_HOST}
+      - PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME}
+      - DELTAEX_API_KEY=${DELTAEX_API_KEY}
+      - CHATWOOT_ACCESS_TOKEN=${CHATWOOT_ACCESS_TOKEN}
+      - CHATWOOT_ACCOUNT_ID=${CHATWOOT_ACCOUNT_ID}
+      - CHATWOOT_BASE_URL=${CHATWOOT_BASE_URL}
     depends_on:
-      - db
-    command: >
-      sh -c "flask db upgrade &&
-             gunicorn -b 0.0.0.0:5000 run:app"
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:13
@@ -21,6 +32,11 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
