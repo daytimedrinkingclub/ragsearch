@@ -45,7 +45,7 @@ services:
         flask seed-db &&
         echo 'Database seeding completed.' &&
         echo 'Starting the application...' &&
-        gunicorn -b 0.0.0.0:${FLASK_RUN_PORT} 'app:create_app()'
+        gunicorn -b 0.0.0.0:${FLASK_RUN_PORT} 'run:app'
       "
 
   db:
