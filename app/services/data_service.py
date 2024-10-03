@@ -26,12 +26,11 @@ class DataService:
         return Chat.query.all()
 
     @staticmethod
-    # service to create a new chat
-    def create_chat():
-        new_chat = Chat()
+    def create_chat(external_id=None):
+        new_chat = Chat(external_id=external_id)
         db.session.add(new_chat)
         db.session.commit()
-        print(f"New Chat created with ID: {new_chat.id}")
+        print(f"New Chat created with ID: {new_chat.id}, External ID: {external_id}")
         return str(new_chat.id)
     
     @staticmethod
@@ -116,3 +115,13 @@ class DataService:
         except Exception as e:
             db.session.rollback()
             raise e
+
+    @staticmethod
+    def get_or_create_chat(external_id):
+        chat = Chat.query.filter_by(external_id=external_id).first()
+        if not chat:
+            chat = Chat(external_id=external_id)
+            db.session.add(chat)
+            db.session.commit()
+            print(f"New Chat created with ID: {chat.id}, External ID: {external_id}")
+        return chat
