@@ -7,7 +7,7 @@ from flask import current_app
 
 webhook_bp = Blueprint('webhook', __name__)
 
-@webhook_bp.route('/webhook', methods=['POST'])
+@webhook_bp.route('/', methods=['POST'])
 def webhook():
     data = request.json
     if data['event'] == 'message_created' and data['message_type'] == 'incoming':
