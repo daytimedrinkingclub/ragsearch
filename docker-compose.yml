@@ -2,7 +2,7 @@ services:
   web:
     build: .
     volumes:
-      - .:/app
+      - ./app:/app/app
       - ./migrations:/app/migrations
     ports:
       - "${FLASK_RUN_PORT}:${FLASK_RUN_PORT}"
@@ -32,19 +32,20 @@ services:
         echo 'Waiting for database...' &&
         while ! nc -z db 5432; do sleep 1; done &&
         echo 'Database is ready!' &&
-        if [ ! -d 'migrations' ]; then
+        if [ ! -d 'migrations' ] || [ -z "$(ls -A migrations)" ]; then
           echo 'Initializing the database...' &&
           flask db init &&
-          echo 'Database initialized.'
+          flask db migrate -m 'Initial migration' &&
+          echo 'Database initialized and initial migration created.'
         fi &&
-        echo 'Upgrading the database...' &&
+        echo 'Applying migrations...' &&
         flask db upgrade &&
-        echo 'Database upgrade completed.' &&
+        echo 'Migrations applied.' &&
         echo 'Seeding the database...' &&
         flask seed-db &&
         echo 'Database seeding completed.' &&
         echo 'Starting the application...' &&
-        gunicorn -b 0.0.0.0:${FLASK_RUN_PORT} run:app
+        gunicorn -b 0.0.0.0:${FLASK_RUN_PORT} 'app:create_app()'
       "
 
   db:
