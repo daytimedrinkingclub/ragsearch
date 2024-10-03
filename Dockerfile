@@ -28,8 +28,8 @@ ENV FLASK_APP=run.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_ENV=production
 
-# Expose the port the app runs on
-EXPOSE 5000
+# Expose the port the app runs on (this is just for documentation, not binding)
+EXPOSE ${FLASK_RUN_PORT}
 
 # Use the entrypoint script to run the application
 ENTRYPOINT ["./entrypoint.sh"]

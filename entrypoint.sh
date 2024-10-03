@@ -38,4 +38,4 @@ echo "Database seeding completed."
 
 # Start the application
 echo "Starting the application..."
-gunicorn -b 0.0.0.0:5000 run:app
+gunicorn -b 0.0.0.0:${FLASK_RUN_PORT} run:app

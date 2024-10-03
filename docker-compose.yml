@@ -5,11 +5,12 @@ services:
       - .:/app
       - ./migrations:/app/migrations
     ports:
-      - "5000:5000"
+      - "${FLASK_RUN_PORT}:${FLASK_RUN_PORT}"
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
+      - FLASK_RUN_PORT=${FLASK_RUN_PORT}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - PINECONE_API_KEY=${PINECONE_API_KEY}
