@@ -20,9 +20,6 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 # Copy the rest of the application code into the container
 COPY . .
 
-# Make the entrypoint script executable
-RUN chmod +x entrypoint.sh
-
 # Set environment variables
 ENV FLASK_APP=run.py
 ENV FLASK_RUN_HOST=0.0.0.0
@@ -31,5 +28,5 @@ ENV FLASK_ENV=production
 # Expose the port the app runs on (this is just for documentation, not binding)
 EXPOSE ${FLASK_RUN_PORT}
 
-# Use the entrypoint script to run the application
-ENTRYPOINT ["./entrypoint.sh"]
+# Run the gunicorn server
+CMD ["gunicorn", "-b", "0.0.0.0:${FLASK_RUN_PORT}", "run:app"]

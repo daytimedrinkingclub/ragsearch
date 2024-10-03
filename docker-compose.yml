@@ -27,13 +27,32 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        while ! nc -z db 5432; do sleep 1; done &&
+        echo 'Database is ready!' &&
+        if [ ! -d 'migrations' ]; then
+          echo 'Initializing the database...' &&
+          flask db init &&
+          echo 'Database initialized.'
+        fi &&
+        echo 'Upgrading the database...' &&
+        flask db upgrade &&
+        echo 'Database upgrade completed.' &&
+        echo 'Seeding the database...' &&
+        flask seed-db &&
+        echo 'Database seeding completed.' &&
+        echo 'Starting the application...' &&
+        gunicorn -b 0.0.0.0:${FLASK_RUN_PORT} run:app
+      "
 
   db:
-    image: postgres:13
+    image: postgres:14-alpine
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
