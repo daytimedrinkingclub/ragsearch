@@ -2,8 +2,7 @@ services:
   web:
     build: .
     volumes:
-      - ./app:/app/app
-      - ./migrations:/app/migrations
+      - .:/app
     ports:
       - "${FLASK_RUN_PORT}:${FLASK_RUN_PORT}"
     environment:
