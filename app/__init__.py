@@ -34,4 +34,11 @@ def create_app(config_class=Config):
         from app.seed import seed_database
         seed_database()
 
+    @app.context_processor
+    def inject_chatwoot_config():
+        return dict(
+            CHATWOOT_BASE_URL=app.config['CHATWOOT_BASE_URL'],
+            CHATWOOT_WEBSITE_TOKEN=app.config['CHATWOOT_WEBSITE_TOKEN']
+        )
+
     return app

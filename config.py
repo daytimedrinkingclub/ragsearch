@@ -16,3 +16,4 @@ class Config:
     CHATWOOT_BASE_URL = os.environ.get('CHATWOOT_BASE_URL')
     CHATWOOT_ACCESS_TOKEN = os.environ.get('CHATWOOT_ACCESS_TOKEN')
     CHATWOOT_ACCOUNT_ID = os.environ.get('CHATWOOT_ACCOUNT_ID')
+    CHATWOOT_WEBSITE_TOKEN = os.environ.get('CHATWOOT_WEBSITE_TOKEN')

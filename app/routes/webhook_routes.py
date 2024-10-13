@@ -36,6 +36,7 @@ def webhook():
             'api_access_token': current_app.config['CHATWOOT_ACCESS_TOKEN']
         }
         
-        requests.post(chatwoot_url, json=chatwoot_response, headers=headers)
+        response = requests.post(chatwoot_url, json=chatwoot_response, headers=headers)
+        current_app.logger.info(f"Chatwoot API response: {response.status_code} - {response.text}")
     
     return '', 200

@@ -21,7 +21,7 @@
     </style>
     <script>
       (function(d,t) {
-        var BASE_URL="https://chatwoot.badalhibadal.com";
+        var BASE_URL="{{ CHATWOOT_BASE_URL }}";
         var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
         g.src=BASE_URL+"/packs/js/sdk.js";
         g.defer = true;
@@ -29,7 +29,7 @@
         s.parentNode.insertBefore(g,s);
         g.onload=function(){
           window.chatwootSDK.run({
-            websiteToken: 'Sn4u9voc4f7WZwfC9WrLfewz',
+            websiteToken: '{{ CHATWOOT_WEBSITE_TOKEN }}',
             baseUrl: BASE_URL
           })
           window.$chatwoot.setCustomAttributes({
