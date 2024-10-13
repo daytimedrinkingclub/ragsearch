@@ -2,8 +2,63 @@ from flask import Blueprint, request, jsonify, render_template, redirect, url_fo
 from app.services.data_service import DataService
 from app.services.embeddings_service import EmbeddingsService
 from app.services.embeddings_search import search_articles
+from firecrawl import FirecrawlApp
+import os
+from urllib.parse import urlparse
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 article_bp = Blueprint('article', __name__)
+
+# Add this new route to scrape and upload articles
+@article_bp.route('/scrape_and_upload_articles', methods=['GET'])
+def scrape_and_upload_articles():
+    try:
+        # Initialize Firecrawl
+        firecrawl_api_key = 'fc-4f631143aa7346aea8d79d14a6f1cf3b'
+        app = FirecrawlApp(api_key=firecrawl_api_key)
+
+        # Define the URL to scrape
+        url = 'https://deltaexchangeindia.freshdesk.com/support/solutions'
+
+        # Validate the URL
+        parsed_url = urlparse(url)
+        if not parsed_url.scheme or not parsed_url.netloc:
+            return jsonify({"error": "Invalid URL provided"}), 400
+
+        logger.info(f"Starting to scrape URL: {url}")
+
+        # Scrape the Delta Exchange India support page
+        scrape_result = app.scrape_url(
+            url,
+            params={'formats': ['markdown']}
+        )
+
+        # Extract the first 10 article links from the scraped content
+        article_links = scrape_result['markdown'].split('](')[1:11]
+        article_links = [link.split(')')[0] for link in article_links]
+
+        logger.info(f"Found {len(article_links)} article links")
+
+        # Scrape and upload each article
+        for index, link in enumerate(article_links, start=1):
+            logger.info(f"Processing article {index} of {len(article_links)}: {link}")
+            article_result = app.scrape_url(link, params={'formats': ['markdown']})
+            article_content = article_result['markdown']
+            article_name = article_content.split('\n')[0].strip('# ')  # Assume the first line is the title
+
+            # Upload the article using the existing upload_article function
+            result = DataService.create_article(article_name, article_content)
+            EmbeddingsService.upsert_article_embedding(result['id'])
+            logger.info(f"Uploaded article: {article_name}")
+
+        return jsonify({"message": f"Successfully scraped and uploaded {len(article_links)} articles"}), 200
+    except Exception as e:
+        logger.error(f"Error in scrape_and_upload_articles: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 # this route adds the article to the database and upserts the embeddings to pinecone
 @article_bp.route('/upload_article', methods=['POST'])
