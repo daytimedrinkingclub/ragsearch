@@ -9,10 +9,9 @@ from typing import List, Dict, Any
 from datetime import datetime
 from app.models.system_model import System
 from extensions import db
+from config import Config
 
 client = anthropic.Client()
-
-MODEL_NAME = "claude-3-opus-20240229"
 
 class AnthropicChat:
 
@@ -30,6 +29,7 @@ class AnthropicChat:
 
     def chat(self, messages):
         system_prompt = self.get_system_prompt()
+        print(f"System Prompt: {system_prompt}")
         
         formatted_messages = [
             {"role": "system", "content": system_prompt},
@@ -37,10 +37,11 @@ class AnthropicChat:
         ]
 
         response = self.client.messages.create(
-            model="claude-3-opus-20240229",
+            model=Config.ANTHROPIC_MODEL,
             messages=formatted_messages,
             max_tokens=1000,
         )
+        print(f"Response Received from non tools API: {response}")
 
         return response.content[0].text
 
@@ -76,9 +77,13 @@ class AnthropicChat:
         else:
             # Default prompt if not found in the database
             system_message = "You are a helpful assistant."
+
+        print(f"System Message: {system_message}")   
+        print(f"Tools: {tools}")
+        print(f"Conversation: {conversation}")
         
         response = client.messages.create(
-            model="claude-3-5-sonnet-20240620",
+            model=Config.ANTHROPIC_MODEL,
             max_tokens=1000,
             temperature=0,
             system=system_message,

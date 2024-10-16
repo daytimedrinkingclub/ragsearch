@@ -5,9 +5,12 @@ load_dotenv()
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-    SQLALCHEMY_DATABASE_URI = f"postgresql://{os.environ.get('POSTGRES_USER')}:{os.environ.get('POSTGRES_PASSWORD')}@db:5432/{os.environ.get('POSTGRES_DB')}"
+    SQLALCHEMY_DATABASE_URI = f"postgresql://{os.environ.get('POSTGRES_USER')}:{os.environ.get('POSTGRES_PASSWORD')}@{os.environ.get('POSTGRES_HOST')}:5432/{os.environ.get('POSTGRES_DB')}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+    OPENAI_MODEL = os.environ.get('OPENAI_MODEL')
+    ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
+    ANTHROPIC_MODEL = os.environ.get('ANTHROPIC_MODEL')
     PINECONE_API_KEY = os.environ.get('PINECONE_API_KEY')
     PINECONE_ENV = os.environ.get('PINECONE_ENV')
     PINECONE_INDEX_NAME = os.environ.get('PINECONE_INDEX_NAME')

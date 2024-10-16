@@ -79,10 +79,15 @@
     }
 
     async function createChat() {
-        const response = await fetch('/chat/create_chat', { method: 'POST' });
-        const data = await response.json();
-        const chatId = data.chat_id;
-        window.location.href = `/chat/${chatId}`;
+        try {
+            const response = await fetch('/chat/create_chat', { method: 'POST' });
+            const data = await response.json();
+            const chatId = data.chat_id;
+            window.location.href = `/chat/${chatId}`;
+        } catch (error) {
+            console.error('Error creating chat:', error);
+            alert('Failed to create chat. Please try again.');
+        }
     }
 
     async function deleteChat(event, chatId) {
