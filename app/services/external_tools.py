@@ -31,5 +31,5 @@ def check_deposit_status(transfer_unique_number, auth_token):
         return {"success": success_message, "data": response_data}
     except requests.RequestException as e:
         # Log the error and return a user-friendly message
-        current_app.logger.error(f"Error checking deposit status: {str(e)}")
+        current_app.logger.error(f"Error checking deposit status: {str(e)} body: {e.response.text}")
         return {"status": "Unable to check deposit status at this time. Please try again later.", "data": e.response.text}

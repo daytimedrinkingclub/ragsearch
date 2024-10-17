@@ -15,7 +15,7 @@ def webhook():
         conversation_id = data['conversation']['id']
         
         current_app.logger.debug(f"Chatwoot API request message: {user_message}, conversation_id: {conversation_id}")
-        auth_token = data['meta']['sender']['custom_attributes'].get('auth_token')
+        auth_token = data['sender']['custom_attributes'].get('auth_token')
         # Handle the chat
         response = AnthropicChat.handle_chat(None, user_message, external_id=conversation_id, auth_token=auth_token)
         
