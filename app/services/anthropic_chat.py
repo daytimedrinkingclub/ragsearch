@@ -2,7 +2,7 @@ import os
 import anthropic
 import json
 from .embeddings_search import search_articles
-from .external_tools import check_deposit_status
+from .external_tools import check_deposit_status, get_wallet_details
 from .data_service import DataService
 from .context_service import ContextService
 from typing import List, Dict, Any
@@ -53,6 +53,9 @@ class AnthropicChat:
         elif tool_name == "check_deposit_status":
             current_app.logger.debug(f"Checking deposit status for: {tool_input['transfer_number']}")
             results = check_deposit_status(tool_input["transfer_number"], auth_token)
+            return results
+        elif tool_name == "get_wallet_details":
+            results = get_wallet_details(auth_token)
             return results
         else:
             raise ValueError(f"Unsupported tool: {tool_name}")
