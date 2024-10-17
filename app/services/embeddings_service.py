@@ -7,7 +7,7 @@ class EmbeddingsService:
     @staticmethod
     def upsert_article_embedding(article_id):
         try:
-            print(f"Embedding service called to upsert the article with id: {article_id}")
+            current_app.logger.debug(f"Embedding service called to upsert the article with id: {article_id}")
             # Retrieve the article from the database
             article = DataService.get_article_by_id(article_id)
             if not article:
@@ -15,7 +15,7 @@ class EmbeddingsService:
 
             # Generate embedding for the article content
             embedding = create_embedding(article.article_content)
-            print(f"Embedding created for the article with id: {article_id}")
+            current_app.logger.debug(f"Embedding created for the article with id: {article_id}")
 
             # connect to pinecone and upsert the embeddings with metadata
             pc = Pinecone(api_key=current_app.config['PINECONE_API_KEY'])

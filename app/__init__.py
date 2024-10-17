@@ -5,6 +5,7 @@ from extensions import db, migrate
 from app.routes.system_routes import system_bp
 from app.routes.webhook_routes import webhook_bp
 from app.models.system_model import System
+import logging
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -23,6 +24,7 @@ def create_app(config_class=Config):
     app.register_blueprint(article_bp, url_prefix='/article')
     app.register_blueprint(chat_bp, url_prefix='/chat')
     app.register_blueprint(webhook_bp, url_prefix='/webhook')
+    app.logger.setLevel(logging.DEBUG)
 
     @app.route('/')
     def home():
