@@ -29,6 +29,11 @@
     },
     {
       "name": "get_wallet_details",
-      "description": "Gets the wallet details of the user, this includes available margin/balance, blocked margin in orders and positions, and blocked commissions"
+      "description": "Gets the wallet details of the user, this includes available margin/balance, blocked margin in orders and positions, and blocked commissions",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
     }
   ]
