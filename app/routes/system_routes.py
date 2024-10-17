@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from app.models.system_model import System
 from extensions import db
 
@@ -19,7 +19,7 @@ def update_prompt():
         new_system_prompt = System(key='system_prompt', value=new_prompt)
         db.session.add(new_system_prompt)
     db.session.commit()
-    print(f"Updated system prompt: {new_prompt}")  # Debugging line
+    current_app.logger.debug(f"Updated system prompt: {new_prompt}")  # Debugging line
     flash('System prompt updated successfully', 'success')
     return redirect(url_for('system.prompt'))
 

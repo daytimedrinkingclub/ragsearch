@@ -10,6 +10,7 @@ from datetime import datetime
 from app.models.system_model import System
 from extensions import db
 from config import Config
+from flask import current_app
 
 client = anthropic.Client()
 
@@ -29,7 +30,6 @@ class AnthropicChat:
 
     def chat(self, messages):
         system_prompt = self.get_system_prompt()
-        print(f"System Prompt: {system_prompt}")
         
         formatted_messages = [
             {"role": "system", "content": system_prompt},
@@ -41,19 +41,18 @@ class AnthropicChat:
             messages=formatted_messages,
             max_tokens=1000,
         )
-        print(f"Response Received from non tools API: {response}")
-
+        current_app.logger.debug(f"Response Received from non tools API: {response}")
         return response.content[0].text
 
     @staticmethod
-    def process_tool_call(tool_name, tool_input, tool_use_id, chat_id):
+    def process_tool_call(tool_name, tool_input, tool_use_id, chat_id, auth_token):
         if tool_name == "search_articles":
-            print(f"Searching articles for: {tool_input['query_to_search']}")
+            current_app.logger.debug(f"Searching articles for: {tool_input['query_to_search']}")
             results = search_articles(tool_input["query_to_search"])
             return results
         elif tool_name == "check_deposit_status":
-            print(f"Checking deposit status for: {tool_input['transfer_number']}")
-            results = check_deposit_status(tool_input["transfer_number"])
+            current_app.logger.debug(f"Checking deposit status for: {tool_input['transfer_number']}")
+            results = check_deposit_status(tool_input["transfer_number"], auth_token)
             return results
         else:
             raise ValueError(f"Unsupported tool: {tool_name}")
@@ -65,7 +64,7 @@ class AnthropicChat:
             return json.load(f)
         
     @staticmethod
-    def process_conversation(chat_id: str) -> List[Dict[str, Any]]:
+    def process_conversation(chat_id: str, auth_token: str) -> List[Dict[str, Any]]:
         tools = AnthropicChat.load_tools()
         conversation = ContextService.build_context(chat_id)
         
@@ -78,10 +77,6 @@ class AnthropicChat:
             # Default prompt if not found in the database
             system_message = "You are a helpful assistant."
 
-        print(f"System Message: {system_message}")   
-        print(f"Tools: {tools}")
-        print(f"Conversation: {conversation}")
-        
         response = client.messages.create(
             model=Config.ANTHROPIC_MODEL,
             max_tokens=1000,
@@ -90,7 +85,7 @@ class AnthropicChat:
             tools=tools,
             messages=conversation,
         )
-        print(f"Response Received from ANTHROPIC API: {response}")
+        current_app.logger.debug(f"Response Received from ANTHROPIC API: {response}")
 
         if response.stop_reason != "tool_use":
             # No tool use, return the final response
@@ -103,18 +98,18 @@ class AnthropicChat:
         content = response.content[0].text if response.content and response.content[0].type == "text" else None
 
         DataService.save_message(chat_id, "assistant", content=content, tool_use_id=tool_use.id, tool_use_input=tool_use.input, tool_name=tool_use.name)
-        tool_result = AnthropicChat.process_tool_call(tool_use.name, tool_use.input, tool_use.id, chat_id)
+        tool_result = AnthropicChat.process_tool_call(tool_use.name, tool_use.input, tool_use.id, chat_id, auth_token)
 
         if tool_result:
             # If a tool result is received, build the latest context and call process_conversation again
             DataService.save_message(chat_id, "user", content=json.dumps(tool_result), tool_use_id=tool_use.id, tool_use_input=tool_use.input, tool_name=tool_use.name, tool_result=json.dumps(tool_result))
             conversation = ContextService.build_context(chat_id)
-            return AnthropicChat.process_conversation(chat_id)
+            return AnthropicChat.process_conversation(chat_id, auth_token)
 
         return response
 
     @staticmethod
-    def handle_chat(chat_id, message, external_id=None):
+    def handle_chat(chat_id, message, external_id=None, auth_token=None):
         if external_id:
             chat = DataService.get_or_create_chat(external_id)
             chat_id = chat.id
@@ -125,6 +120,6 @@ class AnthropicChat:
         
         DataService.save_message(chat_id, "user", content=message)
         # Process the conversation
-        response = AnthropicChat.process_conversation(chat_id)
+        response = AnthropicChat.process_conversation(chat_id, auth_token)
         # Extract the text content from the response
         return response

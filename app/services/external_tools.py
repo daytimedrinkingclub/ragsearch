@@ -1,7 +1,7 @@
 import requests
 from flask import current_app
 
-def check_deposit_status(transfer_unique_number):
+def check_deposit_status(transfer_unique_number, auth_token):
     """
     Checks the deposit status using the provided transfer unique number.
     
@@ -11,9 +11,9 @@ def check_deposit_status(transfer_unique_number):
     Returns:
     dict: The response from the API containing the deposit status.
     """
-    url = "https://cdn-ind.testnet.deltaex.org/v2/deposit/claim"
+    url = f"{current_app.config['DELTAEX_BASE_URL']}/v2/deposit/claim"
     headers = {
-        "Authorization": current_app.config['DELTAEX_API_KEY'],
+        "Authorization": auth_token,
         "Content-Type": "application/json"
     }
     payload = {

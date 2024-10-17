@@ -5,6 +5,7 @@ from sqlalchemy import desc
 from ..models.chat_model import Chat, Message
 from ..models.article_model import Article
 import uuid
+from flask import current_app
 
 
 class DataService:
@@ -23,7 +24,7 @@ class DataService:
         new_chat = Chat(external_id=external_id)
         db.session.add(new_chat)
         db.session.commit()
-        print(f"New Chat created with ID: {new_chat.id}, External ID: {external_id}")
+        current_app.logger.debug(f"New Chat created with ID: {new_chat.id}, External ID: {external_id}")
         return str(new_chat.id)
     
     @staticmethod
@@ -116,5 +117,5 @@ class DataService:
             chat = Chat(external_id=external_id)
             db.session.add(chat)
             db.session.commit()
-            print(f"New Chat created with ID: {chat.id}, External ID: {external_id}")
+            current_app.logger.debug(f"New Chat created with ID: {chat.id}, External ID: {external_id}")
         return chat
