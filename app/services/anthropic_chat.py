@@ -18,9 +18,10 @@ class AnthropicChat:
 
     def __init__(self):
         self.client = anthropic.Anthropic()
-
-    def get_system_prompt(self):
-        system_prompt = System.query.filter_by(key='system_prompt').first()
+    
+    @staticmethod
+    def get_system_prompt(conversation_category):
+        system_prompt = System.query.filter_by(key=conversation_category).first()
         if system_prompt:
             today = datetime.now().strftime("%Y-%m-%d")
             return system_prompt.value.format(today=today)
@@ -28,21 +29,6 @@ class AnthropicChat:
             # Default prompt if not found in the database
             return "You are a helpful assistant."
 
-    def chat(self, messages):
-        system_prompt = self.get_system_prompt()
-        
-        formatted_messages = [
-            {"role": "system", "content": system_prompt},
-            *[{"role": msg.role, "content": msg.content} for msg in messages]
-        ]
-
-        response = self.client.messages.create(
-            model=Config.ANTHROPIC_MODEL,
-            messages=formatted_messages,
-            max_tokens=1000,
-        )
-        current_app.logger.debug(f"Response Received from non tools API: {response}")
-        return response.content[0].text
 
     @staticmethod
     def process_tool_call(tool_name, tool_input, tool_use_id, chat_id, auth_token):
@@ -67,24 +53,18 @@ class AnthropicChat:
             return json.load(f)
         
     @staticmethod
-    def process_conversation(chat_id: str, auth_token: str) -> List[Dict[str, Any]]:
+    def process_conversation(chat_id: str, conversation_category: str, auth_token: str) -> List[Dict[str, Any]]:
         tools = AnthropicChat.load_tools()
         conversation = ContextService.build_context(chat_id)
         
         # Fetch the system prompt from the database
-        system_prompt = System.query.filter_by(key='system_prompt').first()
-        if system_prompt:
-            today = datetime.now().strftime("%Y-%m-%d")
-            system_message = system_prompt.value.format(today=today)
-        else:
-            # Default prompt if not found in the database
-            system_message = "You are a helpful assistant."
+        system_prompt = AnthropicChat.get_system_prompt(conversation_category)
 
         response = client.messages.create(
             model=Config.ANTHROPIC_MODEL,
             max_tokens=1000,
             temperature=0,
-            system=system_message,
+            system=system_prompt,
             tools=tools,
             messages=conversation,
         )
@@ -107,12 +87,12 @@ class AnthropicChat:
             # If a tool result is received, build the latest context and call process_conversation again
             DataService.save_message(chat_id, "user", content=json.dumps(tool_result), tool_use_id=tool_use.id, tool_use_input=tool_use.input, tool_name=tool_use.name, tool_result=json.dumps(tool_result))
             conversation = ContextService.build_context(chat_id)
-            return AnthropicChat.process_conversation(chat_id, auth_token)
+            return AnthropicChat.process_conversation(chat_id, conversation_category, auth_token)
 
         return response
 
     @staticmethod
-    def handle_chat(chat_id, message, external_id=None, auth_token=None):
+    def handle_chat(chat_id, message, conversation_category='general', external_id=None, auth_token=None):
         if external_id:
             chat = DataService.get_or_create_chat(external_id)
             chat_id = chat.id
@@ -123,6 +103,6 @@ class AnthropicChat:
         
         DataService.save_message(chat_id, "user", content=message)
         # Process the conversation
-        response = AnthropicChat.process_conversation(chat_id, auth_token)
+        response = AnthropicChat.process_conversation(chat_id, conversation_category, auth_token)
         # Extract the text content from the response
         return response

@@ -1,24 +1,36 @@
 {% extends "base.html" %}
 
-{% block title %}System Prompt{% endblock %}
+{% block title %}System Prompts{% endblock %}
 
 {% block content %}
-<div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-    <h1 class="text-2xl font-bold mb-4">System Prompt</h1>
-    <form method="POST" action="{{ url_for('system.update_prompt') }}">
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="system_prompt">
-                Edit System Prompt
-            </label>
-            <textarea id="system_prompt" name="system_prompt" rows="10" 
-                      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            >{{ system_prompt }}</textarea>
-        </div>
-        <div class="flex items-center justify-between">
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-                Update Prompt
-            </button>
-        </div>
-    </form>
+<div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold">Prompts List</h2>
+    <a href="{{ url_for('system.add_prompt') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add New Prompt</a>
 </div>
+<table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+    <thead class="bg-gray-200">
+        <tr>
+            <th class="py-2 px-4 text-left">Key</th>
+            <th class="py-2 px-4 text-left">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for system_prompt in system_prompts %}
+        <tr class="border-b">
+            <td class="py-2 px-4">{{ system_prompt.key }}</td>
+            <td class="py-2 px-4 flex space-x-2">
+                <a href="{{ url_for('system.edit_prompt', prompt_key=system_prompt.key) }}" class="text-blue-500 hover:underline flex items-center">
+                    <i class="fas fa-edit w-4 h-4 mr-1"></i> Edit
+                </a>
+                <form action="{{ url_for('system.delete_prompt') }}" method="post" class="inline">
+                  <input type="hidden" name="prompt_key" value="{{ system_prompt.key }}">
+                  <button type="submit" class="text-red-500 hover:underline flex items-center">
+                      <i class="fas fa-trash w-4 h-4 mr-1"></i> Delete
+                  </button>
+              </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
