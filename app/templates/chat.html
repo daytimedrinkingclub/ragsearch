@@ -5,7 +5,17 @@
 {% block content %}
 <div class="flex justify-between items-center mb-4">
     <h2 class="text-2xl font-bold">Chat</h2>
-    <button onclick="createChat()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">New Chat</button>
+    <div class="flex items-center">
+        <select id="chatCategory" class="mr-2 p-2 border rounded">
+            <option value="">Select Category</option>
+            <option value="general">General</option>
+            <option value="deposit">Deposit</option>
+            <option value="withdrawal">Withdrawal</option>
+            <option value="trading">Trading</option>
+            <option value="kyc">Kyc</option>
+        </select>
+        <button onclick="createChat()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">New Chat</button>
+    </div>
 </div>
 <div id="chatContainer" class="bg-white p-6 rounded-lg shadow-md relative min-h-500">
     <div id="loader" class="loader" style="display: none;"></div>
@@ -80,7 +90,14 @@
 
     async function createChat() {
         try {
-            const response = await fetch('/chat/create_chat', { method: 'POST' });
+            const chatCategory = document.getElementById('chatCategory').value;
+            const response = await fetch('/chat/create_chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ category: chatCategory }),
+            });
             const data = await response.json();
             const chatId = data.chat_id;
             window.location.href = `/chat/${chatId}`;

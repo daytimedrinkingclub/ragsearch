@@ -20,12 +20,12 @@ class DataService:
         return Chat.query.all()
 
     @staticmethod
-    def create_chat(external_id=None):
-        new_chat = Chat(external_id=external_id)
+    def create_chat(external_id, category):
+        new_chat = Chat(external_id=external_id, category=category)
         db.session.add(new_chat)
         db.session.commit()
-        current_app.logger.debug(f"New Chat created with ID: {new_chat.id}, External ID: {external_id}")
-        return str(new_chat.id)
+        current_app.logger.debug(f"New Chat created with ID: {new_chat.id}, External ID: {external_id}, category: {category}")
+        return new_chat
     
     @staticmethod
     def save_message(chat_id, role, content, tool_use_id=None, tool_use_input=None, tool_name=None, tool_result=None):
@@ -111,11 +111,11 @@ class DataService:
             raise e
 
     @staticmethod
-    def get_or_create_chat(external_id):
+    def get_or_create_chat(external_id, category):
         chat = Chat.query.filter_by(external_id=external_id).first()
         if not chat:
-            chat = Chat(external_id=external_id)
+            chat = Chat(external_id=external_id, category=category)
             db.session.add(chat)
             db.session.commit()
-            current_app.logger.debug(f"New Chat created with ID: {chat.id}, External ID: {external_id}")
+            current_app.logger.debug(f"New Chat created with ID: {chat.id}, External ID: {external_id}, category: {category}")
         return chat

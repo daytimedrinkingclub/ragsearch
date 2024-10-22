@@ -1,4 +1,4 @@
-from app import db
+from extensions import db
 
 class Article(db.Model):
     id = db.Column(db.String(36), primary_key=True)

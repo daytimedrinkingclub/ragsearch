@@ -26,9 +26,17 @@ def check_deposit_status(transfer_unique_number, auth_token):
         response.raise_for_status()  # Raises an HTTPError for bad responses
         response_data = response.json()
         current_app.logger.info(f"Deposit status response: {response_data}")
-        success_message = "Deposit is completed successfully"
+        success_message = "deposit status fetched successfully"
         current_app.logger.info(success_message)
         return {"success": success_message, "data": response_data}
+    except requests.HTTPError as e:
+        if e.response.status_code == 400:
+            current_app.logger.error(f"Bad request error: {e.response.text}")
+            success_message = "deposit status fetched successfully"
+            return {"status": success_message, "data": e.response.text}
+        else:
+            current_app.logger.error(f"HTTP error: {str(e)} body: {e.response.text}")
+            return {"status": "Unable to check deposit status. Please try again later.", "data": e.response.text}
     except requests.RequestException as e:
         # Log the error and return a user-friendly message
         current_app.logger.error(f"Error checking deposit status: {str(e)} body: {e.response.text}")
@@ -56,3 +64,26 @@ def get_wallet_details(auth_token):
         # Log the error and return a user-friendly message
         current_app.logger.error(f"Error getting wallet details: {str(e)} body: {e.response.text}")
         return {"status": "Unable to get wallet details at this time. Please try again later.", "data": e.response.text}
+
+def get_order_details(order_id, auth_token):
+    """
+    get the order details for a user.
+    
+    Returns:
+    dict: The response from the API containing order details.
+    """
+    url = f"{current_app.config['DELTAEX_BASE_URL']}/v2/orders/{order_id}"
+    headers = {
+        "Authorization": auth_token,
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+        response_data = response.json()
+        return {"success": "orders details fetched successfully", "data": response_data }
+    except requests.RequestException as e:
+        # Log the error and return a user-friendly message
+        current_app.logger.error(f"Error getting orders details: {str(e)} body: {e.response.text}")
+        return {"status": "Unable to get order details", "data": e.response.text}
