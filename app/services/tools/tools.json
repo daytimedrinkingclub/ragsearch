@@ -35,5 +35,21 @@
         "properties": {},
         "required": []
       }
+    },
+    {
+      "name": "get_order_details",
+      "description": "Gets the order details of the user.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "description": "The order ID of the order that needs to be checked."
+          }
+        },
+        "required": [
+          "order_id"
+        ]
+      }
     }
   ]

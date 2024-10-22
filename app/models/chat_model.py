@@ -8,6 +8,7 @@ import uuid
 class Chat(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     external_id = db.Column(db.Integer, nullable=True, unique=True)
+    category = db.Column(db.String(100), nullable=True)
     messages = relationship('Message', back_populates='chat', lazy='dynamic', cascade='all, delete-orphan')
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 

@@ -2,7 +2,7 @@ import os
 import anthropic
 import json
 from .embeddings_search import search_articles
-from .external_tools import check_deposit_status, get_wallet_details
+from .external_tools import check_deposit_status, get_wallet_details, get_order_details
 from .data_service import DataService
 from .context_service import ContextService
 from typing import List, Dict, Any
@@ -20,8 +20,8 @@ class AnthropicChat:
         self.client = anthropic.Anthropic()
     
     @staticmethod
-    def get_system_prompt(conversation_category):
-        system_prompt = System.query.filter_by(key=conversation_category).first()
+    def get_system_prompt(category):
+        system_prompt = System.query.filter_by(key=category).first()
         if system_prompt:
             today = datetime.now().strftime("%Y-%m-%d")
             return system_prompt.value.format(today=today)
@@ -43,6 +43,9 @@ class AnthropicChat:
         elif tool_name == "get_wallet_details":
             results = get_wallet_details(auth_token)
             return results
+        elif tool_name == "get_order_details":
+            results = get_order_details(tool_input["order_id"], auth_token)
+            return results
         else:
             raise ValueError(f"Unsupported tool: {tool_name}")
     
@@ -53,12 +56,12 @@ class AnthropicChat:
             return json.load(f)
         
     @staticmethod
-    def process_conversation(chat_id: str, conversation_category: str, auth_token: str) -> List[Dict[str, Any]]:
+    def process_conversation(chat_id: str, category: str, auth_token: str) -> List[Dict[str, Any]]:
         tools = AnthropicChat.load_tools()
         conversation = ContextService.build_context(chat_id)
         
         # Fetch the system prompt from the database
-        system_prompt = AnthropicChat.get_system_prompt(conversation_category)
+        system_prompt = AnthropicChat.get_system_prompt(category)
 
         response = client.messages.create(
             model=Config.ANTHROPIC_MODEL,
@@ -78,7 +81,7 @@ class AnthropicChat:
         # Handle tool use
         tool_use = next(block for block in response.content if block.type == "tool_use")
         
-        content = response.content[0].text if response.content and response.content[0].type == "text" else None
+        content = response.content[0].text if response.content and response.content[0].type == "text" else ""
 
         DataService.save_message(chat_id, "assistant", content=content, tool_use_id=tool_use.id, tool_use_input=tool_use.input, tool_name=tool_use.name)
         tool_result = AnthropicChat.process_tool_call(tool_use.name, tool_use.input, tool_use.id, chat_id, auth_token)
@@ -87,22 +90,21 @@ class AnthropicChat:
             # If a tool result is received, build the latest context and call process_conversation again
             DataService.save_message(chat_id, "user", content=json.dumps(tool_result), tool_use_id=tool_use.id, tool_use_input=tool_use.input, tool_name=tool_use.name, tool_result=json.dumps(tool_result))
             conversation = ContextService.build_context(chat_id)
-            return AnthropicChat.process_conversation(chat_id, conversation_category, auth_token)
+            return AnthropicChat.process_conversation(chat_id, category, auth_token)
 
         return response
 
     @staticmethod
-    def handle_chat(chat_id, message, conversation_category='general', external_id=None, auth_token=None):
+    def handle_chat(chat_id, message, category='general', external_id=None, auth_token=None):
         if external_id:
-            chat = DataService.get_or_create_chat(external_id)
-            chat_id = chat.id
+            chat = DataService.get_or_create_chat(external_id, category)
         else:
             chat = DataService.get_chat_by_id(chat_id)
             if not chat:
-                chat_id = DataService.create_chat()
+                chat = DataService.create_chat(external_id, category)
         
-        DataService.save_message(chat_id, "user", content=message)
+        DataService.save_message(chat.id, "user", content=message)
         # Process the conversation
-        response = AnthropicChat.process_conversation(chat_id, conversation_category, auth_token)
+        response = AnthropicChat.process_conversation(chat.id, chat.category, auth_token)
         # Extract the text content from the response
         return response

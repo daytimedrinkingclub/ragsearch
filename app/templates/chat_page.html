@@ -6,10 +6,15 @@
 <div class="flex flex-col h-screen">
     <div class="flex justify-between items-center mb-4 p-4 bg-white shadow-md">
         <h2 class="text-2xl font-bold">Chat</h2>
-        <button onclick="window.history.back()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back</button>
+        <div class="flex items-center">
+            <input type="text" id="authTokenInput" class="w-48 p-2 border border-gray-300 rounded mr-2" placeholder="Auth token">
+            <button onclick="window.history.back()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back</button>
+        </div>
     </div>
+
     <div id="chatContainer" class="flex-grow bg-white p-6 rounded-lg shadow-md relative overflow-hidden">
         <div id="loader" class="loader" style="display: none;"></div>
+
         <div id="chatContent" class="overflow-y-auto h-full" style="padding-bottom: 60px;">
             <!-- Chat UI will be dynamically generated here -->
         </div>
@@ -113,8 +118,9 @@
         const inputElement = document.getElementById('chatInput');
         const sendButton = document.getElementById('sendButton');
         const chatContent = document.getElementById('chatContent');
+        const auth_token = document.getElementById('authTokenInput').value;
+        
         const message = inputElement.value;
-
         if (!message.trim()) return;
 
         // Disable input and button
@@ -136,7 +142,11 @@
         const response = await fetch('/chat/send_message', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, message: message })
+            body: JSON.stringify({ 
+                chat_id: chatId,
+                message: message,
+                auth_token: auth_token
+            })
         });
         const data = await response.json();
 
