@@ -3,6 +3,7 @@ from app.services.data_service import DataService
 from app.services.anthropic_chat import AnthropicChat
 from datetime import datetime
 from app.models.chat_model import Chat, Message
+from flask import current_app
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -31,10 +32,14 @@ def get_chats():
 def create_chat():
     """Create a new chat."""
     try:
-        data = request.json
-        external_id = data.get('external_id')
-        chat_id = DataService.create_chat(external_id)
-        return jsonify({"chat_id": chat_id}), 201
+        external_id = None
+        category = "general"
+        if request.is_json:
+            data = request.json
+            external_id = data.get('external_id')
+            category = data.get('category')
+        chat = DataService.create_chat(external_id, category)
+        return jsonify({"chat_id": chat.id}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -44,13 +49,14 @@ def send_message():
     data = request.json
     chat_id = data.get('chat_id')
     message = data.get('message')
+    auth_token = data.get('auth_token')
 
     if not chat_id or not message:
         return jsonify({"error": "Missing chat_id or message"}), 400
 
     try:
-        response = AnthropicChat.handle_chat(chat_id, message)
-        print('Response: ', response)
+        response = AnthropicChat.handle_chat(chat_id, message, auth_token=auth_token)
+        current_app.logger.debug('Response: ', response)
         
         # Extract the text from the first TextBlock object in the response content
         if isinstance(response.content, list) and len(response.content) > 0 and hasattr(response.content[0], 'text'):
