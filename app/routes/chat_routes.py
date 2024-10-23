@@ -56,7 +56,7 @@ def send_message():
 
     try:
         response = AnthropicChat.handle_chat(chat_id, message, auth_token=auth_token)
-        current_app.logger.debug('Response: ', response)
+        current_app.logger.debug(f'Response: {response}')
         
         # Extract the text from the first TextBlock object in the response content
         if isinstance(response.content, list) and len(response.content) > 0 and hasattr(response.content[0], 'text'):

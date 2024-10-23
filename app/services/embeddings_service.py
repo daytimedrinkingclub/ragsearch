@@ -47,10 +47,10 @@ class EmbeddingsService:
             raise e
         
     @staticmethod
-    def update_article_embedding(article_id, new_article_content):
+    def update_article_embedding(article_id, new_article_name, new_article_content):
         try:
             # Update the article in the database
-            updated_article = DataService.update_article(article_id, new_article_content)
+            updated_article = DataService.update_article(article_id, new_article_name, new_article_content)
             if not updated_article:
                 raise ValueError("Article not found")
 
