@@ -85,11 +85,12 @@ class DataService:
         return [{"id": article.id, "article_name": article.article_name} for article in articles]
 
     @staticmethod
-    def update_article(article_id, new_article_content):
+    def update_article(article_id, new_article_name, new_article_content):
         try:
             article = Article.query.get(article_id)
             if article:
                 article.article_content = new_article_content
+                article.article_name = new_article_name
                 db.session.commit()
                 return {"id": article.id, "article_name": article.article_name}
             return None

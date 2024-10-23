@@ -28,7 +28,7 @@ def create_app(config_class=Config):
 
     @app.route('/')
     def home():
-        return redirect(url_for('article.index'))
+        return redirect(url_for('chat.index'))
 
     @app.cli.command("seed-db")
     def seed_db():
