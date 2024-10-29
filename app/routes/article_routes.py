@@ -30,10 +30,11 @@ def upload_from_url():
         firecrawl_api_key = Config.FIRECRAWL_API_KEY
         app = FirecrawlApp(api_key=firecrawl_api_key)
 
-        scrape_result = app.scrape_url(url, params={'formats': ['markdown']})
+        scrape_result = app.scrape_url(url, params={'formats': ['markdown'], 'includeTags': ['.fw-content']})
         crawled_content = scrape_result['markdown']
+        article_title = scrape_result['metadata']['title']
 
-        result = DataService.create_article(url, crawled_content)
+        result = DataService.create_article(article_title, crawled_content)
         EmbeddingsService.upsert_article_embedding(result['id'])
         return jsonify({"article_id": result['id']}), 201
     except Exception as e:
