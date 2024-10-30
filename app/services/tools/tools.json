@@ -51,5 +51,33 @@
           "order_id"
         ]
       }
+    },
+    {
+      "name": "create_support_ticket",
+      "description": "Creates a support ticket for the user. This will create and return a support ticket for the user.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string",
+            "description": "The subject of the support ticket."
+          },
+          "description": {
+            "type": "string",
+            "description": "A detailed description of the issue the user is facing."
+          }
+        },
+        "required": ["subject", "description"]
+      }
+    },
+    {
+      "name": "engage_human_agent",
+      "description": "Initiates engagement with a human agent to assist the user.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
     }
+    
   ]

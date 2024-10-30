@@ -2,7 +2,7 @@ import os
 import anthropic
 import json
 from .embeddings_search import search_articles
-from .external_tools import check_deposit_status, get_wallet_details, get_order_details
+from .external_tools import check_deposit_status, get_wallet_details, get_order_details, create_support_ticket, engage_human_agent
 from .data_service import DataService
 from .context_service import ContextService
 from typing import List, Dict, Any
@@ -45,6 +45,12 @@ class AnthropicChat:
             return results
         elif tool_name == "get_order_details":
             results = get_order_details(tool_input["order_id"], auth_token)
+            return results
+        elif tool_name == "create_support_ticket":
+            results = create_support_ticket(tool_input, auth_token)
+            return results
+        elif tool_name == "engage_human_agent":
+            results = engage_human_agent(chat_id)
             return results
         else:
             raise ValueError(f"Unsupported tool: {tool_name}")
