@@ -1,5 +1,7 @@
 import requests
 from flask import current_app
+from app.vendors import Chatwoot, ServiceDesk
+from app.delta_services import ProfileService
 
 def check_deposit_status(transfer_unique_number, auth_token):
     """
@@ -87,3 +89,28 @@ def get_order_details(order_id, auth_token):
         # Log the error and return a user-friendly message
         current_app.logger.error(f"Error getting orders details: {str(e)} body: {e.response.text}")
         return {"status": "Unable to get order details", "data": e.response.text}
+    
+def create_support_ticket(ticket_payload, auth_token):
+    try:
+        user = ProfileService.get_user_by_auth_token(auth_token)
+        ticket_payload = {
+            "user_id": user["id"],
+            "email": user["email"],
+            "subject": ticket_payload["subject"],
+            "description": ticket_payload["description"]
+        }
+        current_app.logger.debug(f"Support ticket payload: {ticket_payload}")
+        results = ServiceDesk.create_ticket_on_freshdesk(ticket_payload)
+        ticket_url = f"{current_app.config['FRESHDESK_API_BASE_URL']}/a/tickets/{results['id']}"
+        return {"success": "Ticket created successfully", "data": ticket_url}
+    except Exception as exception:
+        current_app.logger.error(f"Error creating support ticket: {str(exception)}")
+        return {"status": "Unable to create ticket", "data": exception.response.text}
+
+def engage_human_agent(chat_id):
+    try: 
+        response = Chatwoot.edit_labels(chat_id)
+        return {"success": "Sent the message successfully", "data": response }
+    except Exception as exception:
+        current_app.logger.error(f"Error engaging human agent: {str(exception)}")
+        return {"status": "Unable to connect with delta agent", "data": exception.response.text}

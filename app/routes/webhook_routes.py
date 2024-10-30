@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.services.anthropic_chat import AnthropicChat
 from app.models.chat_model import Chat
 from app import db
+from app.vendors import Chatwoot
 import requests
 from flask import current_app
 
@@ -27,19 +28,7 @@ def webhook():
             content = str(response.content)
         
         # Send response back to Chatwoot
-        chatwoot_response = {
-            'content': content,
-            'message_type': 'outgoing',
-            'private': False
-        }
-        
-        chatwoot_url = f"{current_app.config['CHATWOOT_BASE_URL']}/api/v1/accounts/{current_app.config['CHATWOOT_ACCOUNT_ID']}/conversations/{conversation_id}/messages"
-        headers = {
-            'Content-Type': 'application/json',
-            'api_access_token': current_app.config['CHATWOOT_ACCESS_TOKEN']
-        }
-        
-        response = requests.post(chatwoot_url, json=chatwoot_response, headers=headers)
-        current_app.logger.debug(f"Chatwoot API response: {response.status_code} - {response.text}")
+        response = Chatwoot.add_message(conversation_id, content)
+        current_app.logger.debug(f"Chatwoot API response: {response}")
     
     return '', 200
